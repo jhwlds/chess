@@ -2,6 +2,8 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
+
 
 /**
  * Represents a single chess piece
@@ -10,9 +12,6 @@ import java.util.Collection;
  * signature of the existing methods.
  */
 public class ChessPiece {
-
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
-    }
 
     /**
      * The various different chess piece options
@@ -26,18 +25,27 @@ public class ChessPiece {
         PAWN
     }
 
+    private final ChessGame.TeamColor teamColor;
+    private final PieceType pieceType;
+
     /**
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return teamColor;
     }
+
+    public PieceType getPieceType() {
+        return pieceType;
+    }
+
 
     /**
      * @return which type of chess piece this piece is
      */
-    public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+    public ChessPiece(ChessGame.TeamColor teamColor, PieceType pieceType) {
+        this.teamColor = teamColor;
+        this.pieceType = pieceType;
     }
 
     /**
@@ -50,4 +58,24 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return new ArrayList<>();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof ChessPiece that))
+            return false;
+        return teamColor == that.teamColor && pieceType == that.pieceType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamColor, pieceType);
+    }
+
+    @Override
+    public String toString() {
+        return teamColor + " " + pieceType;
+    }
 }
+
