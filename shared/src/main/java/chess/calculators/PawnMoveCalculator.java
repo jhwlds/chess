@@ -21,7 +21,25 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
         int row = position.getRow();
         int col = position.getColumn();
 
+        int oneMove = row + direction;
+        if (oneMove >= 1 && oneMove <= 8) {
+            ChessPosition one  = new  ChessPosition(oneMove, col);
+            if (board.getPiece(one) == null) {
+                if (oneMove == promotionRow) {
+
+                }
+            }
+        }
+
         return moves;
+    }
+    private Collection<ChessPiece.PieceType> promotionTypes() {
+        Collection<ChessPiece.PieceType> types = new ArrayList<>();
+        types.add(ChessPiece.PieceType.QUEEN);
+        types.add(ChessPiece.PieceType.ROOK);
+        types.add(ChessPiece.PieceType.BISHOP);
+        types.add(ChessPiece.PieceType.KNIGHT);
+        return types;
     }
 }
 
