@@ -24,9 +24,22 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
         int oneMove = row + direction;
         if (oneMove >= 1 && oneMove <= 8) {
             ChessPosition one  = new  ChessPosition(oneMove, col);
+
             if (board.getPiece(one) == null) {
                 if (oneMove == promotionRow) {
+                    for (ChessPiece.PieceType type : promotionTypes()) {
+                        moves.add(new ChessMove(position, one, type));
+                    }
+                } else {
+                    moves.add(new ChessMove(position, one, null));
+                }
+            }
 
+            if (row == setRow) {
+                int twoMove = row + direction;
+                ChessPosition two  = new  ChessPosition(twoMove, col);
+                if (board.getPiece(two) == null) {
+                    moves.add(new ChessMove(position, two, null));
                 }
             }
         }
