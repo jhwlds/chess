@@ -1,6 +1,7 @@
 package chess;
 import chess.calculators.BishopMoveCalculator;
 import chess.calculators.KingMoveCalculator;
+import chess.calculators.KnightMoveCalculator;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,6 +62,7 @@ public class ChessPiece {
         return switch (pieceType) {
             case BISHOP -> new BishopMoveCalculator().pieceMoves(board, myPosition);
             case KING ->  new KingMoveCalculator().pieceMoves(board, myPosition);
+            case KNIGHT -> new KnightMoveCalculator().pieceMoves(board, myPosition);
 
             default -> new ArrayList<>();
         };
