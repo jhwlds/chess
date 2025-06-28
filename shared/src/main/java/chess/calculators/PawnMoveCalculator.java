@@ -15,6 +15,11 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
         ChessGame.TeamColor myColor = currentPiece.getTeamColor();
 
         int direction = (myColor == ChessGame.TeamColor.WHITE) ? 1 : -1;
+        int setRow = (myColor == ChessGame.TeamColor.WHITE) ? 2 : 7;
+        int promotionRow = (myColor == ChessGame.TeamColor.WHITE) ? 8 : 1;
+
+        int row = position.getRow();
+        int col = position.getColumn();
 
         return moves;
     }
