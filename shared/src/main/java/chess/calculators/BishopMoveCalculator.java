@@ -19,6 +19,32 @@ public class BishopMoveCalculator implements PieceMovesCalculator {
                 {+1, -1},
                 {+1, +1},
         };
+
+        for (int[] i : direction) {
+            int row = position.getRow();
+            int col = position.getColumn();
+
+            while (true) {
+                row += i[0];
+                col += i[1];
+
+                if (row < 1 || row > 8 || col < 1 || col > 8)
+                    break;
+
+                ChessPosition nextPosition = new ChessPosition(row, col);
+                ChessPiece target = board.getPiece(nextPosition);
+
+                if (target == null) {
+                    moves.add(new ChessMove(position, nextPosition,null));
+                } else {
+                    if (target.getTeamColor() != mycolor) {
+                        moves.add(new ChessMove(position, nextPosition, null));
+                    }
+                    break;
+                }
+            }
+        }
+
         return moves;
     }
 }
