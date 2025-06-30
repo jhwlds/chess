@@ -47,7 +47,7 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
             int diagCol = col + dCol;
             int diagRow = row + direction;
 
-            if (diagCol < 1 || diagCol > 8 || diagRow < 1 || diagRow > 8) continue;
+            if (diagCol < 1 || diagCol > 8 || diagRow < 1 || diagRow > 8) {continue;}
 
             ChessPosition diagPos = new ChessPosition(diagRow, diagCol);
             ChessPiece target = board.getPiece(diagPos);

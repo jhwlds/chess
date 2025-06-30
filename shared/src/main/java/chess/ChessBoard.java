@@ -53,16 +53,20 @@ public class ChessBoard {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
 
         ChessBoard other = (ChessBoard) obj;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 ChessPiece p1 = this.board[i][j];
                 ChessPiece p2 = other.board[i][j];
-                if (p1 == null && p2 == null) continue;
-                if (p1 == null || !p1.equals(p2)) return false;
+                if (p1 == null && p2 == null) {continue;}
+                if (p1 == null || !p1.equals(p2)) {return false;}
             }
         }
         return true;

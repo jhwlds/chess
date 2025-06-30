@@ -28,7 +28,7 @@ public class RookMoveCalculator implements PieceMovesCalculator {
                 row += i[0];
                 col += i[1];
 
-                if (row < 1 || row > 8 || col < 1 || col > 8) break;
+                if (row < 1 || row > 8 || col < 1 || col > 8) {break;}
 
                 ChessPosition nextPosition = new ChessPosition(row, col);
                 ChessPiece target = board.getPiece(nextPosition);
