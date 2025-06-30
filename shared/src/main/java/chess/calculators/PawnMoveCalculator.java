@@ -1,7 +1,6 @@
 package chess.calculators;
 
 import chess.*;
-
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -23,7 +22,7 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
 
         int oneMove = row + direction;
         if (oneMove >= 1 && oneMove <= 8) {
-            ChessPosition one  = new  ChessPosition(oneMove, col);
+            ChessPosition one = new ChessPosition(oneMove, col);
 
             if (board.getPiece(one) == null) {
                 if (oneMove == promotionRow) {
@@ -33,19 +32,40 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
                 } else {
                     moves.add(new ChessMove(position, one, null));
                 }
-            }
 
-            if (row == setRow) {
-                int twoMove = row + direction;
-                ChessPosition two  = new  ChessPosition(twoMove, col);
-                if (board.getPiece(two) == null) {
-                    moves.add(new ChessMove(position, two, null));
+                if (row == setRow) {
+                    int twoMove = row + (2 * direction);
+                    ChessPosition two = new ChessPosition(twoMove, col);
+                    if (board.getPiece(two) == null) {
+                        moves.add(new ChessMove(position, two, null));
+                    }
+                }
+            }
+        }
+
+        for (int dCol : new int[]{-1, +1}) {
+            int diagCol = col + dCol;
+            int diagRow = row + direction;
+
+            if (diagCol < 1 || diagCol > 8 || diagRow < 1 || diagRow > 8) continue;
+
+            ChessPosition diagPos = new ChessPosition(diagRow, diagCol);
+            ChessPiece target = board.getPiece(diagPos);
+
+            if (target != null && target.getTeamColor() != myColor) {
+                if (diagRow == promotionRow) {
+                    for (ChessPiece.PieceType type : promotionTypes()) {
+                        moves.add(new ChessMove(position, diagPos, type));
+                    }
+                } else {
+                    moves.add(new ChessMove(position, diagPos, null));
                 }
             }
         }
 
         return moves;
     }
+
     private Collection<ChessPiece.PieceType> promotionTypes() {
         Collection<ChessPiece.PieceType> types = new ArrayList<>();
         types.add(ChessPiece.PieceType.QUEEN);
@@ -55,4 +75,3 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
         return types;
     }
 }
-
