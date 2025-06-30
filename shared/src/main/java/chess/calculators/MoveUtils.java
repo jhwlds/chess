@@ -18,7 +18,7 @@ public class MoveUtils {
             int newRow = fromPos.getRow() + offset[0];
             int newCol = fromPos.getColumn() + offset[1];
 
-            if (newRow < 1 || newRow > 8 || newCol < 1 || newCol > 8) continue;
+            if (newRow < 1 || newRow > 8 || newCol < 1 || newCol > 8) {continue;}
 
             ChessPosition to = new ChessPosition(newRow, newCol);
             ChessPiece target = board.getPiece(to);
