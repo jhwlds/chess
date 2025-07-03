@@ -136,8 +136,11 @@ public class ChessGame {
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if (isInCheck(teamColor)) return false;
+
+        return true;
     }
+
 
     public void setBoard(ChessBoard board) {
         this.board = board;
