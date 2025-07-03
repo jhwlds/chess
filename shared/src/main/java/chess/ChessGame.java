@@ -63,7 +63,26 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition start = move.getStartPosition();
+        ChessPosition end = move.getEndPosition();
+
+        ChessPiece piece = board.getPiece(start);
+        if (piece == null) {throw new InvalidMoveException("No piece at starting position");}
+        if (piece.getTeamColor() != teamTurn) {throw new InvalidMoveException("Wrong team's turn");}
+
+        Collection<ChessMove> legalMoves = piece.pieceMoves(board, start);
+        if (!legalMoves.contains(move)) {throw new InvalidMoveException("Invalid move for piece");}
+
+        ChessPiece.PieceType promote = move.getPromotionPiece();
+        if (promote != null) {
+            board.addPiece(end, new ChessPiece(teamTurn, promote));
+        } else {
+            board.addPiece(end, piece);
+        }
+
+        board.addPiece(start, null);
+
+        teamTurn = (teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
     }
 
     /**
@@ -117,8 +136,8 @@ public class ChessGame {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
+        if (this == obj) {return true;}
+        if (obj == null || getClass() != obj.getClass()) {return false;}
         ChessGame other = (ChessGame) obj;
         return Objects.equals(this.board, other.board) &&
                 this.teamTurn == other.teamTurn;
