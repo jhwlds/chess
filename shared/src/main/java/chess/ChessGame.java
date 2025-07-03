@@ -118,7 +118,14 @@ public class ChessGame {
     }
 
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+            }
+        }
+        return isInCheckmate(teamColor);
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
