@@ -123,9 +123,16 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
 
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if (moves != null && !moves.isEmpty()) {
+                        return false;
+                    }
+                }
             }
         }
-        return isInCheckmate(teamColor);
+
+        return isInCheck(teamColor);
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
