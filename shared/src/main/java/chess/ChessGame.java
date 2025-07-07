@@ -30,7 +30,7 @@ public class ChessGame {
 
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         ChessPiece piece = board.getPiece(startPosition);
-        if (piece == null) return null;
+        if (piece == null) {return null;}
 
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
@@ -58,8 +58,8 @@ public class ChessGame {
         ChessPosition end = move.getEndPosition();
 
         ChessPiece piece = board.getPiece(start);
-        if (piece == null) throw new InvalidMoveException("No piece at starting position");
-        if (piece.getTeamColor() != teamTurn) throw new InvalidMoveException("Wrong team's turn");
+        if (piece == null) {throw new InvalidMoveException("No piece at starting position");}
+        if (piece.getTeamColor() != teamTurn) {throw new InvalidMoveException("Wrong team's turn");}
 
         Collection<ChessMove> legalMoves = this.validMoves(start);
         if (legalMoves == null || !legalMoves.contains(move)) {
@@ -103,16 +103,17 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
 
-                if (piece != null && piece.getTeamColor() == opponent) {
-                    Collection<ChessMove> theirMoves = piece.pieceMoves(board, pos);
-                    for (ChessMove move : theirMoves) {
-                        if (move.getEndPosition().equals(kingPos)) {
-                            return true;
-                        }
+                if (piece == null || piece.getTeamColor() != opponent) {continue;}
+
+                Collection<ChessMove> theirMoves = piece.pieceMoves(board, pos);
+                for (ChessMove move : theirMoves) {
+                    if (move.getEndPosition().equals(kingPos)) {
+                        return true;
                     }
                 }
             }
         }
+
 
         return false;
     }
@@ -136,7 +137,7 @@ public class ChessGame {
     }
 
     public boolean isInStalemate(TeamColor teamColor) {
-        if (isInCheck(teamColor)) return false;
+        if (isInCheck(teamColor)) {return false;}
 
         for (int row = 1; row <= 8; row++) {
             for (int col = 1; col <= 8; col++) {
