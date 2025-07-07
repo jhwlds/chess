@@ -94,7 +94,7 @@ public class ChessGame {
             }
         }
 
-        if (kingPos == null) return false;
+        if (kingPos == null) {return false;}
 
         TeamColor opponent = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
 
@@ -156,6 +156,22 @@ public class ChessGame {
         return true;
     }
 
+    private boolean hasAnyValidMove(TeamColor teamColor) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPosition pos = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(pos);
+
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if (moves != null && !moves.isEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     public void setBoard(ChessBoard board) {
         this.board = board;
