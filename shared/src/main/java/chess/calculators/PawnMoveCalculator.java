@@ -23,7 +23,6 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
         int oneMove = row + direction;
         if (oneMove >= 1 && oneMove <= 8) {
             ChessPosition one = new ChessPosition(oneMove, col);
-
             if (board.getPiece(one) == null) {
                 if (oneMove == promotionRow) {
                     for (ChessPiece.PieceType type : promotionTypes()) {
@@ -47,7 +46,7 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
             int diagCol = col + dCol;
             int diagRow = row + direction;
 
-            if (diagCol < 1 || diagCol > 8 || diagRow < 1 || diagRow > 8) {continue;}
+            if (diagCol < 1 || diagCol > 8 || diagRow < 1 || diagRow > 8) continue;
 
             ChessPosition diagPos = new ChessPosition(diagRow, diagCol);
             ChessPiece target = board.getPiece(diagPos);
@@ -59,6 +58,24 @@ public class PawnMoveCalculator implements PieceMovesCalculator {
                     }
                 } else {
                     moves.add(new ChessMove(position, diagPos, null));
+                }
+            }
+
+            ChessGame game = board.getGame();
+            if (game != null) {
+                ChessPosition enPassantTarget = game.getEnPassantTarget();
+                if (enPassantTarget != null &&
+                        enPassantTarget.getRow() == diagRow &&
+                        enPassantTarget.getColumn() == diagCol) {
+
+                    ChessPosition beside = new ChessPosition(row, diagCol);
+                    ChessPiece besidePiece = board.getPiece(beside);
+                    if (besidePiece != null &&
+                            besidePiece.getPieceType() == ChessPiece.PieceType.PAWN &&
+                            besidePiece.getTeamColor() != myColor) {
+
+                        moves.add(new ChessMove(position, enPassantTarget, null));
+                    }
                 }
             }
         }

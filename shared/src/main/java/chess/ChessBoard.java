@@ -2,6 +2,9 @@ package chess;
 
 public class ChessBoard {
     private final ChessPiece[][] board;
+    private ChessGame game;
+    public void setGame(ChessGame game) { this.game = game; }
+    public ChessGame getGame() { return this.game; }
 
     public ChessBoard() {
         board = new ChessPiece[8][8];
