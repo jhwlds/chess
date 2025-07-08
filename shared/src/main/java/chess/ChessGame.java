@@ -57,22 +57,26 @@ public class ChessGame {
         return validMoves;
     }
 
-    private void makeFakeMove(ChessPosition start, ChessMove move) {
+    private void applyMoveToBoard(ChessBoard board, ChessPosition start, ChessMove move, TeamColor moverTeam, ChessPosition enPassantTarget) {
         ChessPiece piece = board.getPiece(start);
         ChessPiece.PieceType promote = move.getPromotionPiece();
         ChessPosition end = move.getEndPosition();
 
-        board.addPiece(start, null);
-        board.addPiece(end, promote != null ? new ChessPiece(piece.getTeamColor(), promote) : piece);
-
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
                 end.equals(enPassantTarget) &&
-                Math.abs(start.getColumn() - end.getColumn()) == 1 &&
-                board.getPiece(end) == null) {
-
-            int captureRow = (teamTurn == TeamColor.WHITE) ? end.getRow() - 1 : end.getRow() + 1;
+                board.getPiece(end) == null &&
+                Math.abs(start.getColumn() - end.getColumn()) == 1) {
+            int captureRow = (moverTeam == TeamColor.WHITE) ? end.getRow() - 1 : end.getRow() + 1;
             board.addPiece(new ChessPosition(captureRow, end.getColumn()), null);
         }
+
+        board.addPiece(start, null);
+        board.addPiece(end, promote != null ? new ChessPiece(moverTeam, promote) : piece);
+    }
+
+
+    private void makeFakeMove(ChessPosition start, ChessMove move) {
+        applyMoveToBoard(board, start, move, teamTurn, enPassantTarget);
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
@@ -84,24 +88,14 @@ public class ChessGame {
         if (piece.getTeamColor() != teamTurn) {throw new InvalidMoveException("Wrong team");}
 
         Collection<ChessMove> legalMoves = validMoves(start);
-        if (legalMoves == null || !legalMoves.contains(move)) {throw new InvalidMoveException("Illegal move");}
-
-        if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
-                end.equals(enPassantTarget) &&
-                board.getPiece(end) == null &&
-                Math.abs(start.getColumn() - end.getColumn()) == 1) {
-
-            int captureRow = (teamTurn == TeamColor.WHITE) ? end.getRow() - 1 : end.getRow() + 1;
-            board.addPiece(new ChessPosition(captureRow, end.getColumn()), null);
+        if (legalMoves == null || !legalMoves.contains(move)) {
+            throw new InvalidMoveException("Illegal move");
         }
 
-        board.addPiece(start, null);
-        ChessPiece.PieceType promote = move.getPromotionPiece();
-        board.addPiece(end, promote != null ? new ChessPiece(teamTurn, promote) : piece);
+        applyMoveToBoard(board, start, move, teamTurn, enPassantTarget);
 
         if (piece.getPieceType() == ChessPiece.PieceType.PAWN &&
                 Math.abs(start.getRow() - end.getRow()) == 2) {
-
             int row = (start.getRow() + end.getRow()) / 2;
             enPassantTarget = new ChessPosition(row, start.getColumn());
         } else {
@@ -113,7 +107,7 @@ public class ChessGame {
 
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPos = findKingPosition(teamColor);
-        if (kingPos == null) return false;
+        if (kingPos == null) {return false;}
 
         TeamColor enemy = (teamColor == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE;
 
@@ -122,7 +116,7 @@ public class ChessGame {
                 ChessPosition pos = new ChessPosition(row, col);
                 ChessPiece piece = board.getPiece(pos);
 
-                if (piece == null || piece.getTeamColor() != enemy) continue;
+                if (piece == null || piece.getTeamColor() != enemy) {continue;}
 
                 Collection<ChessMove> enemyMoves = piece.pieceMoves(board, pos);
                 for (ChessMove m : enemyMoves) {
