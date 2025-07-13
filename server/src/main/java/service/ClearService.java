@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.AuthTokenDAO;
+import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import shared.ClearResult;
@@ -16,7 +17,7 @@ public class ClearService {
         this.tokenDAO = tokenDAO;
     }
 
-    public ClearResult clearAll() {
+    public ClearResult clearAll() throws DataAccessException {
         userDAO.clear();
         gameDAO.clear();
         tokenDAO.clear();
