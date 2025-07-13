@@ -2,10 +2,10 @@ package dataaccess;
 
 import java.util.HashMap;
 import java.util.Map;
-import model.User;
+import model.UserData;
 
 public class MemoryUserDAO implements UserDAO {
-    private final Map<String, User> users = new HashMap<>();
+    private final Map<String, UserData> users = new HashMap<>();
 
     @Override
     public void clear() {

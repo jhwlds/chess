@@ -1,6 +1,6 @@
 package model;
 
-public class User {
+public class UserData {
     private String username;
     private String password;
     private String email;

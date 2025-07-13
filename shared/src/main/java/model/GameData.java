@@ -1,6 +1,6 @@
 package model;
 
-public class Game {
+public class GameData {
     private int gameID;
     private String gameName;
 }

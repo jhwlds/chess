@@ -2,6 +2,7 @@ package server;
 
 import spark.*;
 import handler.ClearHandler;
+import handler.RegisterHandler;
 
 public class Server {
 

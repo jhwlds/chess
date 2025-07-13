@@ -2,10 +2,10 @@ package dataaccess;
 
 import java.util.HashMap;
 import java.util.Map;
-import model.Game;
+import model.GameData;
 
 public class MemoryGameDAO implements GameDAO {
-    private final Map<Integer, Game> games = new HashMap<>();
+    private final Map<Integer, GameData> games = new HashMap<>();
 
     @Override
     public void clear() {
