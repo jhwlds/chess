@@ -3,38 +3,27 @@ package handler;
 import com.google.gson.Gson;
 import service.ClearService;
 import shared.ClearResult;
-
-import dataaccess.MemoryUserDAO;
-import dataaccess.MemoryGameDAO;
-import dataaccess.MemoryAuthTokenDAO;
-import dataaccess.DataAccessException;
-
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
 public class ClearHandler implements Route {
-    private final Gson gson = new Gson();
+
+    private static final Gson gson = new Gson();
+    private static final ClearService service = new ClearService();
 
     @Override
     public Object handle(Request req, Response res) {
         System.out.println("[DEBUG] ClearHandler was called!");
 
-        ClearService service = new ClearService(
-                new MemoryUserDAO(),
-                new MemoryGameDAO(),
-                new MemoryAuthTokenDAO()
-        );
+        ClearResult result = service.clearAll();
 
-        try {
-            ClearResult result = service.clearAll();
-            res.status(200);
-            res.type("application/json");
-            return gson.toJson(result);
-        } catch (DataAccessException e) {
+        if (result.message().startsWith("Error")) {
             res.status(500);
-            res.type("application/json");
-            return gson.toJson(new ClearResult("Error: " + e.getMessage()));
+        } else {
+            res.status(200);
         }
+        res.type("application/json");
+        return gson.toJson(result);
     }
 }
