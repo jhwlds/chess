@@ -9,12 +9,12 @@ import spark.Response;
 import spark.Route;
 
 public class RegisterHandler implements Route {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     private static final UserService service = new UserService();
 
     @Override
     public Object handle(Request req, Response res) {
-        RegisterRequest request = gson.fromJson(req.body(), RegisterRequest.class);
+        RegisterRequest request = GSON.fromJson(req.body(), RegisterRequest.class);
         RegisterResult result = service.register(request);
 
         switch (result.message() == null ? "" : result.message()) {
@@ -24,6 +24,6 @@ public class RegisterHandler implements Route {
             default                     -> res.status(500);
         }
         res.type("application/json");
-        return gson.toJson(result);
+        return GSON.toJson(result);
     }
 }

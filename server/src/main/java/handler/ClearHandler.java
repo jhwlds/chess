@@ -9,7 +9,7 @@ import spark.Route;
 
 public class ClearHandler implements Route {
 
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
     private static final ClearService service = new ClearService();
 
     @Override
@@ -24,6 +24,6 @@ public class ClearHandler implements Route {
             res.status(200);
         }
         res.type("application/json");
-        return gson.toJson(result);
+        return GSON.toJson(result);
     }
 }
