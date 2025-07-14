@@ -9,11 +9,11 @@ import spark.Response;
 import spark.Route;
 
 public class LoginHandler implements Route {
-    private final Gson GSON = new Gson();
+    private final Gson gson = new Gson();
 
     @Override
     public Object handle(Request req, Response res) {
-        LoginRequest request = GSON.fromJson(req.body(), LoginRequest.class);
+        LoginRequest request = gson.fromJson(req.body(), LoginRequest.class);
         LoginService service = new LoginService();
         LoginResult result = service.login(request);
 
@@ -28,6 +28,6 @@ public class LoginHandler implements Route {
         }
 
         res.type("application/json");
-        return GSON.toJson(result);
+        return gson.toJson(result);
     }
 }

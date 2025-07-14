@@ -10,12 +10,12 @@ import spark.Route;
 
 public class RegisterHandler implements Route {
     private static final Gson GSON = new Gson();
-    private static final UserService service = new UserService();
+    private static final UserService SERVICE = new UserService();
 
     @Override
     public Object handle(Request req, Response res) {
         RegisterRequest request = GSON.fromJson(req.body(), RegisterRequest.class);
-        RegisterResult result = service.register(request);
+        RegisterResult result = SERVICE.register(request);
 
         switch (result.message() == null ? "" : result.message()) {
             case "Error: bad request"   -> res.status(400);
