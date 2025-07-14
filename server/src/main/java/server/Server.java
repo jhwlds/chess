@@ -1,5 +1,6 @@
 package server;
 
+import handler.LoginHandler;
 import spark.*;
 import handler.ClearHandler;
 import handler.RegisterHandler;
@@ -13,6 +14,7 @@ public class Server {
 
         Spark.delete("/db", new ClearHandler());
         Spark.post("/user", new RegisterHandler());
+        Spark.post("/session", new LoginHandler());
 
         Spark.init();
         Spark.awaitInitialization();
