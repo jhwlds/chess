@@ -17,12 +17,7 @@ public class RegisterHandler implements Route {
         RegisterRequest request = GSON.fromJson(req.body(), RegisterRequest.class);
         RegisterResult result = SERVICE.register(request);
 
-        switch (result.message() == null ? "" : result.message()) {
-            case "Error: bad request"   -> res.status(400);
-            case "Error: already taken" -> res.status(403);
-            case ""                     -> res.status(200);
-            default                     -> res.status(500);
-        }
+        ResponseUtils.applyStatus(res, result.message());
         res.type("application/json");
         return GSON.toJson(result);
     }

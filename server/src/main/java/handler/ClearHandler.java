@@ -18,11 +18,7 @@ public class ClearHandler implements Route {
 
         ClearResult result = SERVICE.clearAll();
 
-        if (result.message().startsWith("Error")) {
-            res.status(500);
-        } else {
-            res.status(200);
-        }
+        ResponseUtils.applyStatus(res, result.message());
         res.type("application/json");
         return GSON.toJson(result);
     }
