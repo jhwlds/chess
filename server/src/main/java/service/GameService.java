@@ -55,10 +55,10 @@ public class GameService {
             }
 
             if (color == ChessGame.TeamColor.WHITE) {
-                if (game.whiteUsername() != null) return new JoinGameResult("Error: already taken");
+                if (game.whiteUsername() != null) {return new JoinGameResult("Error: already taken");}
                 game = game.withWhiteUsername(username);
             } else if (color == ChessGame.TeamColor.BLACK) {
-                if (game.blackUsername() != null) return new JoinGameResult("Error: already taken");
+                if (game.blackUsername() != null) {return new JoinGameResult("Error: already taken");}
                 game = game.withBlackUsername(username);
             }
 
