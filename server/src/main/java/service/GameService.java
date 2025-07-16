@@ -68,4 +68,28 @@ public class GameService {
             return new JoinGameResult("Error: " + e.getMessage());
         }
     }
+
+    public GameListResult listGames(String authToken) {
+        try {
+            if (authToken == null || authToken.isEmpty()) {
+                return new GameListResult(List.of(), "Error: unauthorized");
+            }
+            AuthData auth = DAOFactory.authDAO().getAuth(authToken);
+            if (auth == null) {
+                return new GameListResult(List.of(), "Error: unauthorized");
+            }
+
+            List<GameData> games = DAOFactory.gameDAO().listGames();
+
+            List<GameListResult.GameInfo> gameInfos = new ArrayList<>();
+            for (GameData game : games) {
+                gameInfos.add(new GameListResult.GameInfo(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName()));
+            }
+
+            return new GameListResult(gameInfos, null);
+
+        } catch (DataAccessException e) {
+            return new GameListResult(List.of(),"Error: " + e.getMessage());
+        }
+    }
 }

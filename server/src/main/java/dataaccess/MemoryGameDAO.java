@@ -2,7 +2,9 @@ package dataaccess;
 
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,6 +31,11 @@ public class MemoryGameDAO implements GameDAO {
             throw new DataAccessException("Game does not exist");
         }
         games.put(game.gameID(), game);
+    }
+
+    @Override
+    public List<GameData> listGames() {
+        return new ArrayList<>(games.values());
     }
 
     @Override
