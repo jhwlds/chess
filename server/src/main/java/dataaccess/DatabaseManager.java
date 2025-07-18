@@ -41,7 +41,7 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    public static Connection getConnection() throws DataAccessException {
         try {
             //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
@@ -74,4 +74,45 @@ public class DatabaseManager {
         var port = Integer.parseInt(props.getProperty("db.port"));
         connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
     }
+
+    public static void configureDatabase() throws DataAccessException {
+        try (var conn = getConnection();
+             var stmt = conn.createStatement()) {
+
+            // user table
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS user (
+                username VARCHAR(255) PRIMARY KEY,
+                password VARCHAR(255) NOT NULL,
+                email VARCHAR(255)
+            )
+        """);
+
+            // auth_token table
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS auth_token (
+                token VARCHAR(255) PRIMARY KEY,
+                username VARCHAR(255),
+                FOREIGN KEY (username) REFERENCES user(username)
+            )
+        """);
+
+            // game table
+            stmt.executeUpdate("""
+            CREATE TABLE IF NOT EXISTS game (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                game_name VARCHAR(255),
+                white_username VARCHAR(255),
+                black_username VARCHAR(255),
+                json_state TEXT
+            )
+        """);
+
+            System.out.println("Succeed creating db table");
+
+        } catch (SQLException e) {
+            throw new DataAccessException("Failed creating db table", e);
+        }
+    }
+
 }
