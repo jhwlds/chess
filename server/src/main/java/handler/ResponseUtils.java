@@ -13,6 +13,8 @@ public class ResponseUtils {
             res.status(401);
         } else if ("Error: already taken".equals(message)) {
             res.status(403);
+        } else if ("Error: internal".equals(message)) {
+            res.status(500);
         } else {
             res.status(500);
         }

@@ -8,6 +8,7 @@ import model.AuthData;
 import model.UserData;
 import shared.LoginRequest;
 import shared.LoginResult;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class LoginService {
             }
 
             UserData user = userDAO.getUser(req.username());
-            if (user == null || !user.password().equals(req.password())) {
+            if (user == null || !BCrypt.checkpw(req.password(), user.password())) {
                 return new LoginResult("Error: unauthorized");
             }
 
@@ -31,7 +32,7 @@ public class LoginService {
             return new LoginResult(req.username(), token, null);
 
         } catch (DataAccessException e) {
-            return new LoginResult("Error: " + e.getMessage());
+            return new LoginResult("Error: internal");
         }
     }
 }
