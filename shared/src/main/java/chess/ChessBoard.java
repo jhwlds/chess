@@ -2,7 +2,7 @@ package chess;
 
 public class ChessBoard {
     private final ChessPiece[][] board;
-    private ChessGame game;
+    private transient ChessGame game;
     public void setGame(ChessGame game) { this.game = game; }
     public ChessGame getGame() { return this.game; }
 

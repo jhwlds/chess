@@ -74,7 +74,10 @@ public class MySQLGameDAO implements GameDAO {
             stmt.setString(4, gson.toJson(game.game()));
             stmt.setInt(5, game.gameID());
 
-            stmt.executeUpdate();
+            int rows = stmt.executeUpdate();
+            if (rows == 0) {
+                throw new DataAccessException("Game does not exist");
+            }
 
         } catch (SQLException e) {
             throw new DataAccessException("Error updating game", e);
