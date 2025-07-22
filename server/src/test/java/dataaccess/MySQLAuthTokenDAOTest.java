@@ -1,4 +1,4 @@
-package passoff.server.dataaccess;
+package dataaccess;
 
 import dataaccess.*;
 import model.AuthData;

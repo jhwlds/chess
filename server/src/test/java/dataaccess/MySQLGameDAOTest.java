@@ -1,4 +1,4 @@
-package passoff.server.dataaccess;
+package dataaccess;
 
 public class MySQLGameDAOTest {
 }
