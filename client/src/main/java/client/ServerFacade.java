@@ -1,7 +1,14 @@
 package client;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
-
+import model.AuthData;
+import shared.RegisterRequest;
+import shared.LoginRequest;
+import shared.CreateGameRequest;
+import shared.CreateGameResult;
+import shared.JoinGameRequest;
+import shared.GameListResult;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -56,8 +63,46 @@ public class ServerFacade {
                 }
                 return gson.fromJson(response.toString(), responseClass);
             } else {
-                throw new Exception("HTTP " + statusCode + ": " + response);
+                throw new Exception("HTTP " + statusCode + ": " + response.toString());
             }
         }
+    }
+
+    public AuthData register(String username, String password, String email) throws Exception {
+        var request = new RegisterRequest(username, password, email);
+        return makeRequest("POST", "/user", request, AuthData.class, null);
+    }
+
+    public AuthData login(String username, String password) throws Exception {
+        var request = new LoginRequest(username, password);
+        return makeRequest("POST", "/session", request, AuthData.class, null);
+    }
+
+    public void logout(String authToken) throws Exception {
+        makeRequest("DELETE", "/session", null, null, authToken);
+    }
+
+    public GameListResult listGames(String authToken) throws Exception {
+        return makeRequest("GET", "/game", null, GameListResult.class, authToken);
+    }
+
+    public CreateGameResult createGame(String gameName, String authToken) throws Exception {
+        var request = new CreateGameRequest(gameName);
+        return makeRequest("POST", "/game", request, CreateGameResult.class, authToken);
+    }
+
+    public void joinGame(String playerColor, int gameID, String authToken) throws Exception {
+        ChessGame.TeamColor color = null;
+        if ("WHITE".equalsIgnoreCase(playerColor)) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if ("BLACK".equalsIgnoreCase(playerColor)) {
+            color = ChessGame.TeamColor.BLACK;
+        }
+        var request = new JoinGameRequest(color, gameID);
+        makeRequest("PUT", "/game", request, null, authToken);
+    }
+
+    public void clearDatabase() throws Exception {
+        makeRequest("DELETE", "/db", null, null, null);
     }
 }
