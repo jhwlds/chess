@@ -34,10 +34,28 @@ public class Repl {
             case "help":
                 showPreloginHelp();
                 break;
+            case "quit":
+                System.out.println("Goodbye!");
+                System.exit(0);
+                break;
+            case "login":
+                handleLogin();
+                break;
+            case "register":
+                handleRegister();
+                break;
+            default:
+                System.out.println("Unknown command. Type 'help' for a list of commands.");
         }
     }
 
     private void postloginUI() {}
 
-    private void showPreloginHelp() {}
+    private void showPreloginHelp() {
+        System.out.println("Available commands:");
+        System.out.println("  help - Show this help message");
+        System.out.println("  quit - Exit the program");
+        System.out.println("  login - Log in to your account");
+        System.out.println("  register - Create a new account");
+    }
 }
