@@ -134,4 +134,32 @@ public class Repl {
         }
     }
 
+    private void handleLogout() {
+        try {
+            serverFacade.logout(authToken);
+            this.authToken = null;
+            this.username = null;
+            this.playerColor = null;
+            System.out.println("Successfully logged out");
+        } catch (Exception e) {
+            System.out.println("Logout failed: " + e.getMessage());
+        }
+    }
+
+    private void handleCreateGame() {
+        try {
+            System.out.print("Game name: ");
+            String gameName = scanner.nextLine().trim();
+
+            var response = serverFacade.createGame(gameName, authToken);
+            if (response.gameID() != null) {
+                System.out.println("Game created successfully with ID: " + response.gameID());
+            } else {
+                System.out.println("Failed to create game: " + response.message());
+            }
+        } catch (Exception e) {
+            System.out.println("Create game failed: " + e.getMessage());
+        }
+    }
+
 }
