@@ -1,12 +1,15 @@
 package ui;
 
 import client.ServerFacade;
+import model.AuthData;
 import java.util.Scanner;
 
 public class Repl {
     private final ServerFacade serverFacade;
     private final Scanner scanner;
     private String authToken;
+    private String username;
+    private String playerColor;
 
     public Repl(int port) {
         this.serverFacade = new ServerFacade(port);
@@ -58,4 +61,22 @@ public class Repl {
         System.out.println("  login - Log in to your account");
         System.out.println("  register - Create a new account");
     }
+
+    private void handleLogin() {
+        try {
+            System.out.print("Username: ");
+            String username = scanner.nextLine().trim();
+            System.out.print("Password: ");
+            String password = scanner.nextLine().trim();
+
+            AuthData authData = serverFacade.login(username, password);
+            this.authToken = authData.authToken();
+            this.username = authData.username();
+            this.playerColor = null;
+            System.out.println("Successfully logged in as " + username);
+        } catch (Exception e) {
+            System.out.println("Login failed: " + e.getMessage());
+        }
+    }
+
 }
