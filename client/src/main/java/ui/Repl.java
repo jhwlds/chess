@@ -2,6 +2,8 @@ package ui;
 
 import client.ServerFacade;
 import model.AuthData;
+import shared.GameListResult;
+
 import java.util.Scanner;
 
 public class Repl {
@@ -159,6 +161,29 @@ public class Repl {
             }
         } catch (Exception e) {
             System.out.println("Create game failed: " + e.getMessage());
+        }
+    }
+
+    private void handleListGames() {
+        try {
+            GameListResult response = serverFacade.listGames(authToken);
+            if (response.games() != null) {
+                System.out.println("Games:");
+                if (response.games().isEmpty()) {
+                    System.out.println("  No games available");
+                } else {
+                    for (var game : response.games()) {
+                        System.out.printf("  %d. %s (White: %s, Black: %s)%n",
+                                game.gameID(), game.gameName(),
+                                game.whiteUsername() != null ? game.whiteUsername() : "none",
+                                game.blackUsername() != null ? game.blackUsername() : "none");
+                    }
+                }
+            } else {
+                System.out.println("Failed to list games: " + response.message());
+            }
+        } catch (Exception e) {
+            System.out.println("List games failed: " + e.getMessage());
         }
     }
 
