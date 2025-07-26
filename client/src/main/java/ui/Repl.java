@@ -79,4 +79,23 @@ public class Repl {
         }
     }
 
+    private void handleRegister() {
+        try {
+            System.out.print("Username: ");
+            String username = scanner.nextLine().trim();
+            System.out.print("Password: ");
+            String password = scanner.nextLine().trim();
+            System.out.print("Email: ");
+            String email = scanner.nextLine().trim();
+
+            AuthData authData = serverFacade.register(username, password, email);
+            this.authToken = authData.authToken();
+            this.username = authData.username();
+            this.playerColor = null;
+            System.out.println("Successfully registered and logged in as " + username);
+        } catch (Exception e) {
+            System.out.println("Registration failed: " + e.getMessage());
+        }
+    }
+
 }
