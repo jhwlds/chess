@@ -212,6 +212,28 @@ public class Repl {
         }
     }
 
+    private void handleObserveGame() {
+        try {
+            System.out.print("Game ID: ");
+            int gameID = Integer.parseInt(scanner.nextLine().trim());
+            System.out.print("Color to observe (WHITE/BLACK): ");
+            String color = scanner.nextLine().trim().toUpperCase();
+
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Invalid color. Please choose WHITE or BLACK.");
+                return;
+            }
+
+            this.playerColor = color;
+            System.out.println("Observing game " + gameID + " from " + color + " perspective");
+            drawChessBoard();
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid game ID. Please enter a number.");
+        } catch (Exception e) {
+            System.out.println("Observe game failed: " + e.getMessage());
+        }
+    }
+
     private void drawChessBoard() {
 
         ChessGame game = new ChessGame();
