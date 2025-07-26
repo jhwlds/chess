@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import client.ServerFacade;
 import model.AuthData;
 import shared.GameListResult;
@@ -185,6 +186,45 @@ public class Repl {
         } catch (Exception e) {
             System.out.println("List games failed: " + e.getMessage());
         }
+    }
+
+    private void handlePlayGame() {
+        try {
+            System.out.print("Game ID: ");
+            int gameID = Integer.parseInt(scanner.nextLine().trim());
+            System.out.print("Color (WHITE/BLACK): ");
+            String color = scanner.nextLine().trim().toUpperCase();
+
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Invalid color. Please choose WHITE or BLACK.");
+                return;
+            }
+
+            serverFacade.joinGame(color, gameID, authToken);
+            this.playerColor = color;
+            System.out.println("Successfully joined game " + gameID + " as " + color);
+
+            drawChessBoard();
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid game ID. Please enter a number.");
+        } catch (Exception e) {
+            System.out.println("Join game failed: " + e.getMessage());
+        }
+    }
+
+    private void drawChessBoard() {
+
+        ChessGame game = new ChessGame();
+
+        if (playerColor.equals("WHITE")) {
+            System.out.println("\n=== YOUR BOARD (WHITE PERSPECTIVE) ===");
+            ChessBoardDrawer.drawBoard(game, true);
+        } else if (playerColor.equals("BLACK")) {
+            System.out.println("\n=== YOUR BOARD (BLACK PERSPECTIVE) ===");
+            ChessBoardDrawer.drawBoard(game, false);
+        }
+
+        System.out.println("\nNote: This is a static board. Gameplay will be implemented in Phase 6.");
     }
 
 }
