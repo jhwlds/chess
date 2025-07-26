@@ -52,7 +52,33 @@ public class Repl {
         }
     }
 
-    private void postloginUI() {}
+    private void postloginUI() {
+        System.out.print("\n[" + username + "] >>> ");
+        String input = scanner.nextLine().trim().toLowerCase();
+
+        switch (input) {
+            case "help":
+                showPostloginHelp();
+                break;
+            case "logout":
+                handleLogout();
+                break;
+            case "create":
+                handleCreateGame();
+                break;
+            case "list":
+                handleListGames();
+                break;
+            case "play":
+                handlePlayGame();
+                break;
+            case "observe":
+                handleObserveGame();
+                break;
+            default:
+                System.out.println("Unknown command. Type 'help' for a list of commands.");
+        }
+    }
 
     private void showPreloginHelp() {
         System.out.println("Available commands:");
@@ -60,6 +86,16 @@ public class Repl {
         System.out.println("  quit - Exit the program");
         System.out.println("  login - Log in to your account");
         System.out.println("  register - Create a new account");
+    }
+
+    private void showPostloginHelp() {
+        System.out.println("Available commands:");
+        System.out.println("  help - Show this help message");
+        System.out.println("  logout - Log out of your account");
+        System.out.println("  create - Create a new game");
+        System.out.println("  list - List all games");
+        System.out.println("  play <gameID> <WHITE|BLACK> - Join a game as a player");
+        System.out.println("  observe <gameID> <WHITE|BLACK> - Observe a game from chosen perspective");
     }
 
     private void handleLogin() {
