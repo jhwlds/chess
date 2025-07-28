@@ -5,6 +5,8 @@ import client.ServerFacade;
 import model.AuthData;
 import shared.GameListResult;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Repl {
@@ -13,6 +15,8 @@ public class Repl {
     private String authToken;
     private String username;
     private String playerColor;
+    private final Map<Integer, Integer> gameIdToSequential = new HashMap<>();
+    private int nextSequentialId = 1;
 
     public Repl(int port) {
         this.serverFacade = new ServerFacade(port);
@@ -97,8 +101,8 @@ public class Repl {
         System.out.println("  logout - Log out of your account");
         System.out.println("  create - Create a new game");
         System.out.println("  list - List all games");
-        System.out.println("  play <gameID> <WHITE|BLACK> - Join a game as a player");
-        System.out.println("  observe <gameID> <WHITE|BLACK> - Observe a game from chosen perspective");
+        System.out.println("  play <gameNumber> <WHITE|BLACK> - Join a game as a player");
+        System.out.println("  observe <gameNumber> <WHITE|BLACK> - Observe a game from chosen perspective");
     }
 
     private void handleLogin() {
@@ -114,7 +118,7 @@ public class Repl {
             this.playerColor = null;
             System.out.println("Successfully logged in as " + username);
         } catch (Exception e) {
-            System.out.println("Login failed: " + e.getMessage());
+            System.out.println("Login failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
     }
 
@@ -133,7 +137,7 @@ public class Repl {
             this.playerColor = null;
             System.out.println("Successfully registered and logged in as " + username);
         } catch (Exception e) {
-            System.out.println("Registration failed: " + e.getMessage());
+            System.out.println("Registration failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
     }
 
@@ -145,7 +149,7 @@ public class Repl {
             this.playerColor = null;
             System.out.println("Successfully logged out");
         } catch (Exception e) {
-            System.out.println("Logout failed: " + e.getMessage());
+            System.out.println("Logout failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
     }
 
@@ -156,12 +160,14 @@ public class Repl {
 
             var response = serverFacade.createGame(gameName, authToken);
             if (response.gameID() != null) {
-                System.out.println("Game created successfully with ID: " + response.gameID());
+                int sequentialId = nextSequentialId++;
+                gameIdToSequential.put(response.gameID(), sequentialId);
+                System.out.println("Game " + sequentialId + " created successfully");
             } else {
-                System.out.println("Failed to create game: " + response.message());
+                System.out.println("Failed to create game: " + getUserFriendlyErrorMessage(response.message()));
             }
         } catch (Exception e) {
-            System.out.println("Create game failed: " + e.getMessage());
+            System.out.println("Create game failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
     }
 
@@ -173,65 +179,99 @@ public class Repl {
                 if (response.games().isEmpty()) {
                     System.out.println("  No games available");
                 } else {
+                    gameIdToSequential.clear();
+                    nextSequentialId = 1;
+                    
                     for (var game : response.games()) {
+                        int sequentialId = nextSequentialId++;
+                        gameIdToSequential.put(game.gameID(), sequentialId);
                         System.out.printf("  %d. %s (White: %s, Black: %s)%n",
-                                game.gameID(), game.gameName(),
+                                sequentialId, game.gameName(),
                                 game.whiteUsername() != null ? game.whiteUsername() : "none",
                                 game.blackUsername() != null ? game.blackUsername() : "none");
                     }
                 }
             } else {
-                System.out.println("Failed to list games: " + response.message());
+                System.out.println("Failed to list games: " + getUserFriendlyErrorMessage(response.message()));
             }
         } catch (Exception e) {
-            System.out.println("List games failed: " + e.getMessage());
+            System.out.println("List games failed: " + getUserFriendlyErrorMessage(e.getMessage()));
+        }
+    }
+
+    private Integer findActualGameId(int sequentialId) {
+        for (Map.Entry<Integer, Integer> entry : gameIdToSequential.entrySet()) {
+            if (entry.getValue() == sequentialId) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    private GameInputResult getGameInput(String colorPrompt) {
+        try {
+            System.out.print("Game number: ");
+            int sequentialId = Integer.parseInt(scanner.nextLine().trim());
+            System.out.print(colorPrompt);
+            String color = scanner.nextLine().trim().toUpperCase();
+
+            if (!color.equals("WHITE") && !color.equals("BLACK")) {
+                System.out.println("Invalid color. Please choose WHITE or BLACK.");
+                return null;
+            }
+
+            Integer actualGameId = findActualGameId(sequentialId);
+
+            if (actualGameId == null) {
+                System.out.println("Invalid game number. Please enter a valid game number from the list.");
+                return null;
+            }
+
+            return new GameInputResult(sequentialId, actualGameId, color);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid game number. Please enter a number.");
+            return null;
+        }
+    }
+
+    private static class GameInputResult {
+        final int sequentialId;
+        final int actualGameId;
+        final String color;
+
+        GameInputResult(int sequentialId, int actualGameId, String color) {
+            this.sequentialId = sequentialId;
+            this.actualGameId = actualGameId;
+            this.color = color;
         }
     }
 
     private void handlePlayGame() {
+        GameInputResult input = getGameInput("Color (WHITE/BLACK): ");
+        if (input == null) {
+            return;
+        }
+
         try {
-            System.out.print("Game ID: ");
-            int gameID = Integer.parseInt(scanner.nextLine().trim());
-            System.out.print("Color (WHITE/BLACK): ");
-            String color = scanner.nextLine().trim().toUpperCase();
-
-            if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                System.out.println("Invalid color. Please choose WHITE or BLACK.");
-                return;
-            }
-
-            serverFacade.joinGame(color, gameID, authToken);
-            this.playerColor = color;
-            System.out.println("Successfully joined game " + gameID + " as " + color);
+            serverFacade.joinGame(input.color, input.actualGameId, authToken);
+            this.playerColor = input.color;
+            System.out.println("Successfully joined game " + input.sequentialId + " as " + input.color);
 
             drawChessBoard();
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid game ID. Please enter a number.");
         } catch (Exception e) {
-            System.out.println("Join game failed: " + e.getMessage());
+            System.out.println("Join game failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
     }
 
     private void handleObserveGame() {
-        try {
-            System.out.print("Game ID: ");
-            int gameID = Integer.parseInt(scanner.nextLine().trim());
-            System.out.print("Color to observe (WHITE/BLACK): ");
-            String color = scanner.nextLine().trim().toUpperCase();
-
-            if (!color.equals("WHITE") && !color.equals("BLACK")) {
-                System.out.println("Invalid color. Please choose WHITE or BLACK.");
-                return;
-            }
-
-            this.playerColor = color;
-            System.out.println("Observing game " + gameID + " from " + color + " perspective");
-            drawChessBoard();
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid game ID. Please enter a number.");
-        } catch (Exception e) {
-            System.out.println("Observe game failed: " + e.getMessage());
+        GameInputResult input = getGameInput("Color to observe (WHITE/BLACK): ");
+        if (input == null) {
+            return;
         }
+
+        this.playerColor = input.color;
+        System.out.println("Observing game " + input.sequentialId + " from " + input.color + " perspective");
+        drawChessBoard();
     }
 
     private void drawChessBoard() {
@@ -249,4 +289,43 @@ public class Repl {
         System.out.println("\nNote: This is a static board. Gameplay will be implemented in Phase 6.");
     }
 
+    private String getUserFriendlyErrorMessage(String message) {
+        if (message == null) {
+            return "An unknown error occurred.";
+        }
+        
+        if (message.contains("HTTP 400") || message.contains("bad request")) {
+            return "Invalid request. Please check your input and try again.";
+        }
+        if (message.contains("HTTP 401") || message.contains("unauthorized")) {
+            return "You are not authorized. Please log in again.";
+        }
+        if (message.contains("HTTP 403") || message.contains("already taken")) {
+            return "This resource is already taken. Please try a different option.";
+        }
+        if (message.contains("HTTP 500") || message.contains("internal")) {
+            return "Server error. Please try again later.";
+        }
+        if (message.contains("Game name already in use")) {
+            return "Game name already in use. Please choose a different name.";
+        }
+        if (message.contains("Invalid username or password")) {
+            return "Invalid username or password. Please try again.";
+        }
+        if (message.contains("Username already in use")) {
+            return "Username already in use. Please choose a different username.";
+        }
+        if (message.contains("Invalid email")) {
+            return "Invalid email address. Please enter a valid email.";
+        }
+        if (message.contains("No response received")) {
+            return "Unable to connect to server. Please check your connection.";
+        }
+        if (message.contains("HTTP 404")) {
+            return "Resource not found. Please check your input.";
+        }
+        
+        // Remove technical details and return a cleaner message
+        return message.replaceAll("HTTP \\d+: ", "").replaceAll("Error: ", "");
+    }
 }

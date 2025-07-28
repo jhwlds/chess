@@ -50,7 +50,7 @@ public class ChessBoardDrawer {
 
     private static void drawSquare(ChessPiece piece, int row, int col) {
         boolean isLightSquare = (row + col) % 2 == 0;
-        String squareColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_WHITE : EscapeSequences.SET_BG_COLOR_BLACK;
+        String squareColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_BLACK : EscapeSequences.SET_BG_COLOR_WHITE;
         String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
 
         if (piece == null) {
