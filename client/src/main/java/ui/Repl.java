@@ -131,6 +131,23 @@ public class Repl {
             System.out.print("Email: ");
             String email = scanner.nextLine().trim();
 
+            if (username.isEmpty()) {
+                System.out.println("Username cannot be empty. Please try again.");
+                return;
+            }
+            if (password.isEmpty()) {
+                System.out.println("Password cannot be empty. Please try again.");
+                return;
+            }
+            if (email.isEmpty()) {
+                System.out.println("Email cannot be empty. Please try again.");
+                return;
+            }
+            if (!email.contains("@")) {
+                System.out.println("Invalid email format. Please enter a valid email address.");
+                return;
+            }
+
             AuthData authData = serverFacade.register(username, password, email);
             this.authToken = authData.authToken();
             this.username = authData.username();
@@ -162,7 +179,7 @@ public class Repl {
             if (response.gameID() != null) {
                 int sequentialId = nextSequentialId++;
                 gameIdToSequential.put(response.gameID(), sequentialId);
-                System.out.println("Game " + sequentialId + " created successfully");
+                System.out.println("Game created successfully");
             } else {
                 System.out.println("Failed to create game: " + getUserFriendlyErrorMessage(response.message()));
             }
@@ -316,6 +333,15 @@ public class Repl {
             return "Username already in use. Please choose a different username.";
         }
         if (message.contains("Invalid email")) {
+            return "Invalid email address. Please enter a valid email.";
+        }
+        if (message.contains("email") && message.contains("empty")) {
+            return "Email cannot be empty. Please enter a valid email address.";
+        }
+        if (message.contains("email") && message.contains("format")) {
+            return "Invalid email format. Please enter a valid email address.";
+        }
+        if (message.contains("Email")) {
             return "Invalid email address. Please enter a valid email.";
         }
         if (message.contains("No response received")) {
