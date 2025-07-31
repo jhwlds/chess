@@ -105,14 +105,20 @@ public class WebSocketHandler {
     }
 
     private void sendMessage(Session session, Object message) throws IOException {
-
+        session.getRemote().sendString(gson.toJson(message));
     }
 
     private void sendError(Session session, String errorMessage) throws IOException {
-
+        ErrorMessage error = new ErrorMessage(errorMessage);
+        sendMessage(session, error);
     }
 
     private void sendNotificationToOthers(String excludeAuthToken, Integer gameID, String message) throws IOException {
-
+        NotificationMessage notification = new NotificationMessage(message);
+        for (Connection connection : connections.values()) {
+            if (!connection.authToken.equals(excludeAuthToken) && connection.gameID.equals(gameID)) {
+                sendMessage(connection.session, notification);
+            }
+        }
     }
 } 
