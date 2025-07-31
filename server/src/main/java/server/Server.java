@@ -4,6 +4,7 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import handler.*;
 import spark.*;
+import websocket.WebSocketHandler;
 
 public class Server {
 
@@ -21,7 +22,7 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
-
+        Spark.webSocket("/ws", WebSocketHandler.class);
         Spark.delete("/db", new ClearHandler());
         Spark.post("/user", new RegisterHandler());
         Spark.post("/session", new LoginHandler());
