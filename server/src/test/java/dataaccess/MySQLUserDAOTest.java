@@ -1,9 +1,5 @@
 package dataaccess;
 
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
-import dataaccess.MySQLUserDAO;
-import dataaccess.UserDAO;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import org.mindrot.jbcrypt.BCrypt;
