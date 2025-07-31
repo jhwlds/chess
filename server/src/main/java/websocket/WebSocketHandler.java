@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataaccess.DataAccessException;
@@ -90,8 +91,56 @@ public class WebSocketHandler {
     }
 
     private void makeMove(Session session, UserGameCommand command) throws IOException {
-        // TODO: Implement make move logic
-        sendError(session, "Make move not implemented yet");
+        try {
+            String authToken = command.getAuthToken();
+            Integer gameID = command.getGameID();
+            ChessMove move = command.getMove();
+            
+            if (move == null) {
+                sendError(session, "Error: No move provided");
+                return;
+            }
+
+            AuthData authData = authDAO.getAuth(authToken);
+            if (authData == null) {
+                sendError(session, "Error: Invalid auth token");
+                return;
+            }
+
+            GameData gameData = gameDAO.getGame(gameID);
+            if (gameData == null) {
+                sendError(session, "Error: Game not found");
+                return;
+            }
+
+            ChessGame game = gameData.game();
+            if (game == null) {
+                game = new ChessGame();
+            }
+
+            try {
+                game.makeMove(move);
+            } catch (chess.InvalidMoveException e) {
+                sendError(session, "Error: " + e.getMessage());
+                return;
+            }
+
+            GameData updatedGameData = new GameData(gameData.gameID(), gameData.gameName(),
+                                                   gameData.whiteUsername(), gameData.blackUsername(), game);
+            gameDAO.updateGame(updatedGameData);
+
+            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+            for (Connection connection : connections.values()) {
+                if (connection.gameID.equals(gameID)) {
+                    sendMessage(connection.session, loadGameMessage);
+                }
+            }
+
+            sendNotificationToOthers(authToken, gameID, authData.username() + " made a move");
+
+        } catch (DataAccessException e) {
+            sendError(session, "Error: " + e.getMessage());
+        }
     }
 
     private void leave(Session session, UserGameCommand command) throws IOException {
