@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataaccess.DataAccessException;
@@ -13,6 +14,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.UserGameCommand;
+import websocket.messages.*;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,6 +75,14 @@ public class WebSocketHandler {
             Connection connection = new Connection(authToken, session, gameID);
             connections.put(authToken, connection);
 
+            ChessGame game = gameData.game();
+            if (game == null) {
+                game = new ChessGame();
+            }
+            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+            sendMessage(session, loadGameMessage);
+
+            sendNotificationToOthers(authToken, gameID, "A player joined the game");
 
         } catch (DataAccessException e) {
             sendError(session, "Error: " + e.getMessage());

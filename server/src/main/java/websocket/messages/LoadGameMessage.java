@@ -1,6 +1,22 @@
 package websocket.messages;
 
+import chess.ChessGame;
+import websocket.messages.ServerMessage.ServerMessageType;
 
 public class LoadGameMessage {
+    private final ServerMessageType serverMessageType;
+    private final ChessGame game;
 
+    public LoadGameMessage(ChessGame game) {
+        this.serverMessageType = ServerMessageType.LOAD_GAME;
+        this.game = game;
+    }
+
+    public ServerMessageType getServerMessageType() {
+        return serverMessageType;
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
 } 
