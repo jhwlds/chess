@@ -197,8 +197,18 @@ public class WebSocketHandler {
     }
 
     private void leave(Session session, UserGameCommand command) throws IOException {
-        // TODO: Implement leave logic
-        sendError(session, "Leave not implemented yet");
+        executeWithValidation(session, command, (session1, authToken, gameID, authData, gameData) -> {
+            String playerUsername = authData.username();
+            
+            connections.remove(authToken);
+
+            NotificationMessage notification = new NotificationMessage(playerUsername + " left the game");
+            for (Connection connection : connections.values()) {
+                if (connection.gameID.equals(gameID)) {
+                    sendMessage(connection.session, notification);
+                }
+            }
+        });
     }
 
     private void resign(Session session, UserGameCommand command) throws IOException {
