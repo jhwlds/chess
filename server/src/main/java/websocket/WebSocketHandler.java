@@ -95,10 +95,10 @@ public class WebSocketHandler {
             Integer gameID = command.getGameID();
 
             AuthData authData = validateAuthToken(session, authToken);
-            if (authData == null) return;
+            if (authData == null) {return;}
 
             GameData gameData = validateGame(session, gameID);
-            if (gameData == null) return;
+            if (gameData == null) {return;}
 
             handler.handle(session, authToken, gameID, authData, gameData);
 
