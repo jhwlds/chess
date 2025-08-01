@@ -2,6 +2,8 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataaccess.DataAccessException;
@@ -118,6 +120,40 @@ public class WebSocketHandler {
                 game = new ChessGame();
             }
 
+            ChessGame.TeamColor currentTurn = game.getTeamTurn();
+            ChessPosition startPosition = move.getStartPosition();
+            ChessPiece piece = game.getBoard().getPiece(startPosition);
+            
+            if (piece == null) {
+                sendError(session, "Error: No piece at start position");
+                return;
+            }
+
+            ChessGame.TeamColor pieceColor = piece.getTeamColor();
+            String playerUsername = authData.username();
+
+            ChessGame.TeamColor playerColor = null;
+            if (playerUsername.equals(gameData.whiteUsername())) {
+                playerColor = ChessGame.TeamColor.WHITE;
+            } else if (playerUsername.equals(gameData.blackUsername())) {
+                playerColor = ChessGame.TeamColor.BLACK;
+            }
+            
+            if (playerColor == null) {
+                sendError(session, "Error: Player not in game");
+                return;
+            }
+            
+            if (pieceColor != playerColor) {
+                sendError(session, "Error: Cannot move opponent's piece");
+                return;
+            }
+            
+            if (currentTurn != playerColor) {
+                sendError(session, "Error: Not your turn");
+                return;
+            }
+            
             try {
                 game.makeMove(move);
             } catch (chess.InvalidMoveException e) {
