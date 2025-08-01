@@ -202,6 +202,17 @@ public class WebSocketHandler {
             
             connections.remove(authToken);
 
+            GameData updatedGameData = gameData;
+            if (playerUsername.equals(gameData.whiteUsername())) {
+                updatedGameData = gameData.withWhiteUsername(null);
+            } else if (playerUsername.equals(gameData.blackUsername())) {
+                updatedGameData = gameData.withBlackUsername(null);
+            }
+            
+            if (!updatedGameData.equals(gameData)) {
+                updateGameInDatabase(updatedGameData, getGameWithFallback(updatedGameData));
+            }
+
             NotificationMessage notification = new NotificationMessage(playerUsername + " left the game");
             for (Connection connection : connections.values()) {
                 if (connection.gameID.equals(gameID)) {
