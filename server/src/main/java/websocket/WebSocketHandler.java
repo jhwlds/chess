@@ -136,6 +136,11 @@ public class WebSocketHandler {
             }
 
             ChessGame game = getGameWithFallback(gameData);
+            
+            if (game.isGameOver()) {
+                sendError(session1, "Error: Game is over");
+                return;
+            }
 
             ChessGame.TeamColor currentTurn = game.getTeamTurn();
             ChessPosition startPosition = move.getStartPosition();
@@ -206,6 +211,8 @@ public class WebSocketHandler {
             }
 
             ChessGame game = getGameWithFallback(gameData);
+
+            game.setGameOver(true);
 
             updateGameInDatabase(gameData, game);
 

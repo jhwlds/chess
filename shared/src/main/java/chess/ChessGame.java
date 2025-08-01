@@ -12,12 +12,14 @@ public class ChessGame {
     private boolean whiteKingMoved, blackKingMoved;
     private boolean whiteQueensideRookMoved, whiteKingsideRookMoved;
     private boolean blackQueensideRookMoved, blackKingsideRookMoved;
+    private boolean gameOver;
 
     public ChessGame() {
         this.board = new ChessBoard();
         this.board.resetBoard();
         this.teamTurn = TeamColor.WHITE;
         this.enPassantTarget = null;
+        this.gameOver = false;
         board.setGame(this);
     }
 
@@ -35,6 +37,14 @@ public class ChessGame {
 
     public void setEnPassantTarget(ChessPosition pos) {
         this.enPassantTarget = pos;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 
     public enum TeamColor {
@@ -92,6 +102,10 @@ public class ChessGame {
     }
 
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if (gameOver) {
+            throw new InvalidMoveException("Game is over");
+        }
+        
         ChessPosition start = move.getStartPosition();
         ChessPosition end = move.getEndPosition();
         ChessPiece piece = board.getPiece(start);
