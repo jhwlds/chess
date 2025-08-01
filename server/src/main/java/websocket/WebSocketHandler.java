@@ -211,6 +211,11 @@ public class WebSocketHandler {
             }
 
             ChessGame game = getGameWithFallback(gameData);
+            
+            if (game.isGameOver()) {
+                sendError(session1, "Error: Game is already over");
+                return;
+            }
 
             game.setGameOver(true);
 
