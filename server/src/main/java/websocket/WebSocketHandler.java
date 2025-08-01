@@ -56,76 +56,93 @@ public class WebSocketHandler {
         }
     }
 
-    private void connect(Session session, UserGameCommand command) throws IOException {
+    private AuthData validateAuthToken(Session session, String authToken) throws IOException, DataAccessException {
+        AuthData authData = authDAO.getAuth(authToken);
+        if (authData == null) {
+            sendError(session, "Error: Invalid auth token");
+            return null;
+        }
+        return authData;
+    }
+
+    private GameData validateGame(Session session, Integer gameID) throws IOException, DataAccessException {
+        GameData gameData = gameDAO.getGame(gameID);
+        if (gameData == null) {
+            sendError(session, "Error: Game not found");
+            return null;
+        }
+        return gameData;
+    }
+
+    private ChessGame getGameWithFallback(GameData gameData) {
+        ChessGame game = gameData.game();
+        if (game == null) {
+            game = new ChessGame();
+        }
+        return game;
+    }
+
+    private void updateGameInDatabase(GameData gameData, ChessGame game) throws DataAccessException {
+        GameData updatedGameData = new GameData(gameData.gameID(), gameData.gameName(),
+                gameData.whiteUsername(), gameData.blackUsername(), game);
+        gameDAO.updateGame(updatedGameData);
+    }
+
+    private void executeWithValidation(Session session, UserGameCommand command,
+                                       ValidationHandler handler) throws IOException {
         try {
             String authToken = command.getAuthToken();
             Integer gameID = command.getGameID();
 
-            // Validate authToken
-            AuthData authData = authDAO.getAuth(authToken);
-            if (authData == null) {
-                sendError(session, "Error: Invalid auth token");
-                return;
-            }
+            AuthData authData = validateAuthToken(session, authToken);
+            if (authData == null) return;
 
-            // Validate gameID
-            GameData gameData = gameDAO.getGame(gameID);
-            if (gameData == null) {
-                sendError(session, "Error: Game not found");
-                return;
-            }
+            GameData gameData = validateGame(session, gameID);
+            if (gameData == null) return;
 
-            Connection connection = new Connection(authToken, session, gameID);
-            connections.put(authToken, connection);
-
-            ChessGame game = gameData.game();
-            if (game == null) {
-                game = new ChessGame();
-            }
-            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-            sendMessage(session, loadGameMessage);
-
-            sendNotificationToOthers(authToken, gameID, "A player joined the game");
+            handler.handle(session, authToken, gameID, authData, gameData);
 
         } catch (DataAccessException e) {
             sendError(session, "Error: " + e.getMessage());
         }
     }
 
+    @FunctionalInterface
+    private interface ValidationHandler {
+        void handle(Session session, String authToken, Integer gameID,
+                    AuthData authData, GameData gameData) throws IOException, DataAccessException;
+    }
+
+    private void connect(Session session, UserGameCommand command) throws IOException {
+        executeWithValidation(session, command, (session1, authToken, gameID, authData, gameData) -> {
+            Connection connection = new Connection(authToken, session1, gameID);
+            connections.put(authToken, connection);
+
+            ChessGame game = getGameWithFallback(gameData);
+            LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+            sendMessage(session1, loadGameMessage);
+
+            sendNotificationToOthers(authToken, gameID, "A player joined the game");
+        });
+    }
+
     private void makeMove(Session session, UserGameCommand command) throws IOException {
-        try {
-            String authToken = command.getAuthToken();
-            Integer gameID = command.getGameID();
+        executeWithValidation(session, command, (session1, authToken, gameID, authData, gameData) -> {
             ChessMove move = command.getMove();
-            
+
             if (move == null) {
-                sendError(session, "Error: No move provided");
+                sendError(session1, "Error: No move provided");
                 return;
             }
 
-            AuthData authData = authDAO.getAuth(authToken);
-            if (authData == null) {
-                sendError(session, "Error: Invalid auth token");
-                return;
-            }
-
-            GameData gameData = gameDAO.getGame(gameID);
-            if (gameData == null) {
-                sendError(session, "Error: Game not found");
-                return;
-            }
-
-            ChessGame game = gameData.game();
-            if (game == null) {
-                game = new ChessGame();
-            }
+            ChessGame game = getGameWithFallback(gameData);
 
             ChessGame.TeamColor currentTurn = game.getTeamTurn();
             ChessPosition startPosition = move.getStartPosition();
             ChessPiece piece = game.getBoard().getPiece(startPosition);
-            
+
             if (piece == null) {
-                sendError(session, "Error: No piece at start position");
+                sendError(session1, "Error: No piece at start position");
                 return;
             }
 
@@ -138,32 +155,30 @@ public class WebSocketHandler {
             } else if (playerUsername.equals(gameData.blackUsername())) {
                 playerColor = ChessGame.TeamColor.BLACK;
             }
-            
+
             if (playerColor == null) {
-                sendError(session, "Error: Player not in game");
-                return;
-            }
-            
-            if (pieceColor != playerColor) {
-                sendError(session, "Error: Cannot move opponent's piece");
-                return;
-            }
-            
-            if (currentTurn != playerColor) {
-                sendError(session, "Error: Not your turn");
-                return;
-            }
-            
-            try {
-                game.makeMove(move);
-            } catch (chess.InvalidMoveException e) {
-                sendError(session, "Error: " + e.getMessage());
+                sendError(session1, "Error: Player not in game");
                 return;
             }
 
-            GameData updatedGameData = new GameData(gameData.gameID(), gameData.gameName(),
-                                                   gameData.whiteUsername(), gameData.blackUsername(), game);
-            gameDAO.updateGame(updatedGameData);
+            if (pieceColor != playerColor) {
+                sendError(session1, "Error: Cannot move opponent's piece");
+                return;
+            }
+
+            if (currentTurn != playerColor) {
+                sendError(session1, "Error: Not your turn");
+                return;
+            }
+
+            try {
+                game.makeMove(move);
+            } catch (chess.InvalidMoveException e) {
+                sendError(session1, "Error: " + e.getMessage());
+                return;
+            }
+
+            updateGameInDatabase(gameData, game);
 
             LoadGameMessage loadGameMessage = new LoadGameMessage(game);
             for (Connection connection : connections.values()) {
@@ -173,10 +188,7 @@ public class WebSocketHandler {
             }
 
             sendNotificationToOthers(authToken, gameID, authData.username() + " made a move");
-
-        } catch (DataAccessException e) {
-            sendError(session, "Error: " + e.getMessage());
-        }
+        });
     }
 
     private void leave(Session session, UserGameCommand command) throws IOException {
@@ -185,8 +197,25 @@ public class WebSocketHandler {
     }
 
     private void resign(Session session, UserGameCommand command) throws IOException {
-        // TODO: Implement resign logic
-        sendError(session, "Resign not implemented yet");
+        executeWithValidation(session, command, (session1, authToken, gameID, authData, gameData) -> {
+            String playerUsername = authData.username();
+            if (!playerUsername.equals(gameData.whiteUsername()) &&
+                    !playerUsername.equals(gameData.blackUsername())) {
+                sendError(session1, "Error: Only players can resign");
+                return;
+            }
+
+            ChessGame game = getGameWithFallback(gameData);
+
+            updateGameInDatabase(gameData, game);
+
+            NotificationMessage notification = new NotificationMessage(playerUsername + " resigned the game");
+            for (Connection connection : connections.values()) {
+                if (connection.gameID.equals(gameID)) {
+                    sendMessage(connection.session, notification);
+                }
+            }
+        });
     }
 
     private void sendMessage(Session session, Object message) throws IOException {
