@@ -70,17 +70,7 @@ public class WebSocketClient {
             System.out.println("Error parsing message: " + e.getMessage());
         }
     }
-
-    @OnClose
-    public void onClose(Session session, CloseReason closeReason) {
-        System.out.println("Connection closed: " + closeReason.getReasonPhrase());
-    }
-
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        System.out.println("WebSocket error: " + throwable.getMessage());
-    }
-
+    
     public void makeMove(ChessMove move) {
         UserGameCommand moveCommand = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
         moveCommand.setMove(move);

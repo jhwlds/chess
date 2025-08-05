@@ -312,21 +312,6 @@ public class Repl {
         }
     }
 
-    private void drawChessBoard() {
-
-        ChessGame game = new ChessGame();
-
-        if (playerColor.equals("WHITE")) {
-            System.out.println("\n=== YOUR BOARD (WHITE PERSPECTIVE) ===");
-            ChessBoardDrawer.drawBoard(game, true);
-        } else if (playerColor.equals("BLACK")) {
-            System.out.println("\n=== YOUR BOARD (BLACK PERSPECTIVE) ===");
-            ChessBoardDrawer.drawBoard(game, false);
-        }
-
-        System.out.println("\nNote: This is a static board. Gameplay will be implemented in Phase 6.");
-    }
-
     private String getUserFriendlyErrorMessage(String message) {
         if (message == null) {
             return "An unknown error occurred.";
