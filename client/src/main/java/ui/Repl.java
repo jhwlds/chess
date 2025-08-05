@@ -299,7 +299,7 @@ public class Repl {
             String serverUrl = "http://localhost:" + serverFacade.getPort();
             WebSocketClient webSocketClient = new WebSocketClient(serverUrl, authToken, gameID, null);
 
-            GameplayUI gameplayUI = new GameplayUI(username, playerColor, gameID, webSocketClient);
+            GameplayUI gameplayUI = new GameplayUI(playerColor, webSocketClient);
 
             webSocketClient.setGameplayUI(gameplayUI);
 

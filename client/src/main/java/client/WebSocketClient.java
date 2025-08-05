@@ -1,6 +1,5 @@
 package client;
 
-import chess.ChessGame;
 import chess.ChessMove;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -56,7 +55,7 @@ public class WebSocketClient {
             switch (serverMessage.getServerMessageType()) {
                 case LOAD_GAME:
                     LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
-                    //call the ui
+                    gameplayUI.updateGame(loadGameMessage.getGame());
                     break;
                 case ERROR:
                     ErrorMessage errorMessage = gson.fromJson(message, ErrorMessage.class);
