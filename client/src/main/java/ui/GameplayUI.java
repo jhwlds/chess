@@ -52,15 +52,31 @@ public class GameplayUI {
     }
 
     public void updateGame(ChessGame game) {
+        this.currentGame = game;
+        redrawBoard();
     }
 
     private void showHelp() {
+        System.out.println("Available commands:");
+        System.out.println("  help - Show this help message");
+        System.out.println("  redraw - Redraw the chess board");
+        System.out.println("  leave - Leave the game");
+        System.out.println("  move - Make a move");
+        System.out.println("  resign - Resign the game");
+        System.out.println("  highlight - Highlight legal moves for a piece");
     }
 
     private void redrawBoard() {
+        System.out.println("\n=== CHESS BOARD ===");
+        boolean whitePerspective = playerColor.equals("WHITE") || playerColor.equals("OBSERVER");
+        ChessBoardDrawer.drawBoard(currentGame, whitePerspective);
+        System.out.println();
     }
 
     private void handleLeave() {
+        System.out.println("Leaving game...");
+        webSocketClient.leave();
+        webSocketClient.close();
     }
 
     private void handleMakeMove() {
@@ -71,5 +87,4 @@ public class GameplayUI {
 
     private void handleHighlightLegalMoves() {
     }
-
 } 
