@@ -20,8 +20,15 @@ public class ServerFacade {
     private final String serverUrl;
     private final Gson gson = new Gson();
 
+    private final int port;
+
     public ServerFacade(int port) {
+        this.port = port;
         this.serverUrl = "http://localhost:" + port;
+    }
+
+    public int getPort() {
+        return port;
     }
 
     private <T> T makeRequest(String method, String path, Object request, Class<T> responseClass, String authToken) throws Exception {

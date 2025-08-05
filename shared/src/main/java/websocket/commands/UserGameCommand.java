@@ -17,7 +17,7 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    private final ChessMove move;
+    private ChessMove move;
 
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
@@ -54,6 +54,10 @@ public class UserGameCommand {
 
     public ChessMove getMove() {
         return move;
+    }
+
+    public void setMove(ChessMove move) {
+        this.move = move;
     }
 
     @Override

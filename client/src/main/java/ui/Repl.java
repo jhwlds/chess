@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import client.ServerFacade;
+import client.WebSocketClient;
 import model.AuthData;
 import shared.GameListResult;
 
@@ -274,7 +275,8 @@ public class Repl {
             this.playerColor = input.color;
             System.out.println("Successfully joined game " + input.sequentialId + " as " + input.color);
 
-            drawChessBoard();
+            // Start gameplay mode
+            startGameplayMode(input.actualGameId, input.color);
         } catch (Exception e) {
             System.out.println("Join game failed: " + getUserFriendlyErrorMessage(e.getMessage()));
         }
@@ -286,9 +288,28 @@ public class Repl {
             return;
         }
 
-        this.playerColor = input.color;
+        this.playerColor = "OBSERVER";
         System.out.println("Observing game " + input.sequentialId + " from " + input.color + " perspective");
-        drawChessBoard();
+
+        startGameplayMode(input.actualGameId, "OBSERVER");
+    }
+
+    private void startGameplayMode(int gameID, String playerColor) {
+        try {
+            String serverUrl = "http://localhost:" + serverFacade.getPort();
+            WebSocketClient webSocketClient = new WebSocketClient(serverUrl, authToken, gameID, null);
+
+            GameplayUI gameplayUI = new GameplayUI(username, playerColor, gameID, webSocketClient);
+
+            webSocketClient.setGameplayUI(gameplayUI);
+
+            webSocketClient.connect();
+
+            gameplayUI.run();
+            
+        } catch (Exception e) {
+            System.out.println("Failed to start gameplay: " + e.getMessage());
+        }
     }
 
     private void drawChessBoard() {
