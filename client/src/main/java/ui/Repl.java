@@ -291,7 +291,7 @@ public class Repl {
         this.playerColor = "OBSERVER";
         System.out.println("Observing game " + input.sequentialId + " from " + input.color + " perspective");
 
-        startGameplayMode(input.actualGameId, "OBSERVER");
+        startGameplayMode(input.actualGameId, input.color);
     }
 
     private void startGameplayMode(int gameID, String playerColor) {

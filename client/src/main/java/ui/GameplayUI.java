@@ -71,7 +71,7 @@ public class GameplayUI {
 
     private void redrawBoard() {
         System.out.println("\n=== CHESS BOARD ===");
-        boolean whitePerspective = playerColor.equals("WHITE") || playerColor.equals("OBSERVER");
+        boolean whitePerspective = playerColor.equals("WHITE");
         ChessBoardDrawer.drawBoard(currentGame, whitePerspective);
         System.out.println();
     }
@@ -83,9 +83,51 @@ public class GameplayUI {
     }
 
     private void handleMakeMove() {
+        if (playerColor.equals("OBSERVER")) {
+            System.out.println("Observers cannot make moves.");
+            return;
+        }
+
+        if (currentGame.isGameOver()) {
+            System.out.println("Game is over. No moves can be made.");
+            return;
+        }
+
+        try {
+            System.out.print("Enter start position (e.g., 'e2'): ");
+            String startPos = scanner.nextLine().trim();
+            ChessPosition start = parsePosition(startPos);
+
+            System.out.print("Enter end position (e.g., 'e4'): ");
+            String endPos = scanner.nextLine().trim();
+            ChessPosition end = parsePosition(endPos);
+
+            System.out.print("Enter promotion piece (Q/R/B/N) or press Enter for no promotion: ");
+            String promotionStr = scanner.nextLine().trim();
+
+            ChessMove move = new ChessMove(start, end, null);
+            if (!promotionStr.isEmpty()) {
+                move = new ChessMove(start, end, parsePromotionPiece(promotionStr));
+            }
+
+            webSocketClient.makeMove(move);
+        } catch (Exception e) {
+            System.out.println("Invalid move: " + e.getMessage());
+        }
     }
 
     private void handleResign() {
+        if (playerColor.equals("OBSERVER")) {
+            System.out.println("Observers cannot resign.");
+            return;
+        }
+
+        System.out.print("Are you sure you want to resign? (yes/no): ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+        if (confirm.equals("yes")) {
+            webSocketClient.resign();
+            System.out.println("You have resigned the game.");
+        }
     }
 
     private void handleHighlightLegalMoves() {
