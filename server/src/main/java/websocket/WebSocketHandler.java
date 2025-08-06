@@ -209,8 +209,8 @@ public class WebSocketHandler {
             if (game.isInCheckmate(game.getTeamTurn())) {
                 game.setGameOver(true);
                 updateGameInDatabase(gameData, game);
-                String winner = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
-                String checkmateMessage = winner + " won by checkmate!";
+                String loser = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
+                String checkmateMessage = loser + "in checkmate";
                 for (Connection connection : connections.values()) {
                     if (connection.gameID.equals(gameID)) {
                         sendMessage(connection.session, new NotificationMessage(checkmateMessage));
