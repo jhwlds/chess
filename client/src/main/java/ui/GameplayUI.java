@@ -7,6 +7,8 @@ import chess.ChessPiece;
 import client.WebSocketClient;
 
 import java.util.Scanner;
+import java.util.Collection;
+import java.util.ArrayList;
 
 public class GameplayUI {
     private final Scanner scanner;
@@ -140,9 +142,17 @@ public class GameplayUI {
 
             if (legalMoves != null && !legalMoves.isEmpty()) {
                 System.out.println("Legal moves for piece at " + posStr + ":");
+
+                Collection<ChessPosition> highlightedPositions = new ArrayList<>();
                 for (ChessMove move : legalMoves) {
+                    highlightedPositions.add(move.getEndPosition());
                     System.out.println("  " + formatPosition(move.getEndPosition()));
                 }
+
+                System.out.println("\n=== CHESS BOARD WITH HIGHLIGHTS ===");
+                boolean whitePerspective = playerColor.equals("WHITE");
+                ChessBoardDrawer.drawBoardWithHighlights(currentGame, whitePerspective, highlightedPositions);
+                System.out.println();
             } else {
                 System.out.println("No legal moves for piece at " + posStr);
             }

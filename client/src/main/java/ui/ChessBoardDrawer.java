@@ -4,6 +4,7 @@ import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import java.util.Collection;
 
 public class ChessBoardDrawer {
     public static void drawBoard(ChessGame game, boolean whitePerspective) {
@@ -15,6 +16,18 @@ public class ChessBoardDrawer {
             drawWhitePerspective(board);
         } else {
             drawBlackPerspective(board);
+        }
+    }
+
+    public static void drawBoardWithHighlights(ChessGame game, boolean whitePerspective, Collection<ChessPosition> highlightedPositions) {
+        drawBoardWithHighlights(game.getBoard(), whitePerspective, highlightedPositions);
+    }
+
+    public static void drawBoardWithHighlights(ChessBoard board, boolean whitePerspective, Collection<ChessPosition> highlightedPositions) {
+        if (whitePerspective) {
+            drawWhitePerspectiveWithHighlights(board, highlightedPositions);
+        } else {
+            drawBlackPerspectiveWithHighlights(board, highlightedPositions);
         }
     }
 
@@ -34,6 +47,22 @@ public class ChessBoardDrawer {
         System.out.println("   h  g  f  e  d  c  b  a");
     }
 
+    private static void drawWhitePerspectiveWithHighlights(ChessBoard board, Collection<ChessPosition> highlightedPositions) {
+        System.out.println("\n   a  b  c  d  e  f  g  h");
+        System.out.println("  ------------------------");
+        drawBoardRowsWithHighlights(board, 8, 1, -1, 1, 8, true, highlightedPositions);
+        System.out.println("  ------------------------");
+        System.out.println("   a  b  c  d  e  f  g  h");
+    }
+
+    private static void drawBlackPerspectiveWithHighlights(ChessBoard board, Collection<ChessPosition> highlightedPositions) {
+        System.out.println("\n   h  g  f  e  d  c  b  a");
+        System.out.println("  ------------------------");
+        drawBoardRowsWithHighlights(board, 1, 8, 1, 8, 1, false, highlightedPositions);
+        System.out.println("  ------------------------");
+        System.out.println("   h  g  f  e  d  c  b  a");
+    }
+
     private static void drawBoardRows(ChessBoard board, int startRow, int endRow, int rowStep, 
                                      int startCol, int endCol, boolean whitePerspective) {
         for (int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
@@ -48,9 +77,35 @@ public class ChessBoardDrawer {
         }
     }
 
+    private static void drawBoardRowsWithHighlights(ChessBoard board, int startRow, int endRow, int rowStep, 
+                                                   int startCol, int endCol, boolean whitePerspective, Collection<ChessPosition> highlightedPositions) {
+        for (int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
+            System.out.print(row + " |");
+            for (int col = startCol; whitePerspective ? col <= endCol : col >= endCol; 
+                 col += whitePerspective ? 1 : -1) {
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = board.getPiece(position);
+                boolean isHighlighted = highlightedPositions != null && highlightedPositions.contains(position);
+                drawSquare(piece, row, col, isHighlighted);
+            }
+            System.out.println("| " + row);
+        }
+    }
+
     private static void drawSquare(ChessPiece piece, int row, int col) {
+        drawSquare(piece, row, col, false);
+    }
+
+    private static void drawSquare(ChessPiece piece, int row, int col, boolean isHighlighted) {
         boolean isLightSquare = (row + col) % 2 == 0;
-        String squareColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_BLACK : EscapeSequences.SET_BG_COLOR_WHITE;
+        String squareColor;
+        
+        if (isHighlighted) {
+            squareColor = EscapeSequences.SET_BG_COLOR_GREEN;
+        } else {
+            squareColor = isLightSquare ? EscapeSequences.SET_BG_COLOR_BLACK : EscapeSequences.SET_BG_COLOR_WHITE;
+        }
+        
         String resetColor = EscapeSequences.RESET_BG_COLOR + EscapeSequences.RESET_TEXT_COLOR;
 
         if (piece == null) {
