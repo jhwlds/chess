@@ -122,7 +122,17 @@ public class WebSocketHandler {
             LoadGameMessage loadGameMessage = new LoadGameMessage(game);
             sendMessage(session1, loadGameMessage);
 
-            sendNotificationToOthers(authToken, gameID, "A player joined the game");
+            String playerUsername = authData.username();
+            String joinMessage;
+            
+            if (playerUsername.equals(gameData.whiteUsername())) {
+                joinMessage = playerUsername + " (WHITE) joined the game";
+            } else if (playerUsername.equals(gameData.blackUsername())) {
+                joinMessage = playerUsername + " (BLACK) joined the game";
+            } else {
+                joinMessage = playerUsername + " joined as observer";
+            }
+            sendNotificationToOthers(authToken, gameID, joinMessage);
         });
     }
 
@@ -192,9 +202,10 @@ public class WebSocketHandler {
                 }
             }
 
-            sendNotificationToOthers(authToken, gameID, authData.username() + " made a move");
+            // Create detailed move notification
+            String detailedMoveMessage = createDetailedMoveMessage(authData.username(), move, piece);
+            sendNotificationToOthers(authToken, gameID, detailedMoveMessage);
             
-            // Check for checkmate, stalemate, or check after the move
             if (game.isInCheckmate(game.getTeamTurn())) {
                 game.setGameOver(true);
                 updateGameInDatabase(gameData, game);
@@ -215,7 +226,6 @@ public class WebSocketHandler {
                     }
                 }
             } else if (game.isInCheck(game.getTeamTurn())) {
-                // Check notification
                 String playerInCheck = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
                 String checkMessage = playerInCheck + " is in check!";
                 for (Connection connection : connections.values()) {
@@ -291,6 +301,32 @@ public class WebSocketHandler {
         sendMessage(session, error);
     }
 
+    private String createDetailedMoveMessage(String playerName, ChessMove move, ChessPiece piece) {
+        String pieceName = getPieceName(piece);
+        String startPos = positionToString(move.getStartPosition());
+        String endPos = positionToString(move.getEndPosition());
+        
+        return playerName + " moved " + pieceName + " from " + startPos + " to " + endPos;
+    }
+    
+    private String getPieceName(ChessPiece piece) {
+        switch (piece.getPieceType()) {
+            case KING: return "King";
+            case QUEEN: return "Queen";
+            case BISHOP: return "Bishop";
+            case KNIGHT: return "Knight";
+            case ROOK: return "Rook";
+            case PAWN: return "Pawn";
+            default: return "Piece";
+        }
+    }
+    
+    private String positionToString(ChessPosition position) {
+        char file = (char)('a' + position.getColumn() - 1);
+        int rank = position.getRow();
+        return file + String.valueOf(rank);
+    }
+    
     private void sendNotificationToOthers(String excludeAuthToken, Integer gameID, String message) throws IOException {
         NotificationMessage notification = new NotificationMessage(message);
         for (Connection connection : connections.values()) {
