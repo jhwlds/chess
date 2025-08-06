@@ -193,6 +193,37 @@ public class WebSocketHandler {
             }
 
             sendNotificationToOthers(authToken, gameID, authData.username() + " made a move");
+            
+            // Check for checkmate, stalemate, or check after the move
+            if (game.isInCheckmate(game.getTeamTurn())) {
+                game.setGameOver(true);
+                updateGameInDatabase(gameData, game);
+                String winner = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
+                String checkmateMessage = winner + " won by checkmate!";
+                for (Connection connection : connections.values()) {
+                    if (connection.gameID.equals(gameID)) {
+                        sendMessage(connection.session, new NotificationMessage(checkmateMessage));
+                    }
+                }
+            } else if (game.isInStalemate(game.getTeamTurn())) {
+                game.setGameOver(true);
+                updateGameInDatabase(gameData, game);
+                String stalemateMessage = "Game ended in stalemate!";
+                for (Connection connection : connections.values()) {
+                    if (connection.gameID.equals(gameID)) {
+                        sendMessage(connection.session, new NotificationMessage(stalemateMessage));
+                    }
+                }
+            } else if (game.isInCheck(game.getTeamTurn())) {
+                // Check notification
+                String playerInCheck = (game.getTeamTurn() == ChessGame.TeamColor.WHITE) ? gameData.whiteUsername() : gameData.blackUsername();
+                String checkMessage = playerInCheck + " is in check!";
+                for (Connection connection : connections.values()) {
+                    if (connection.gameID.equals(gameID)) {
+                        sendMessage(connection.session, new NotificationMessage(checkMessage));
+                    }
+                }
+            }
         });
     }
 
