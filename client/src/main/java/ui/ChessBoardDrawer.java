@@ -78,7 +78,8 @@ public class ChessBoardDrawer {
     }
 
     private static void drawBoardRowsWithHighlights(ChessBoard board, int startRow, int endRow, int rowStep, 
-                                                   int startCol, int endCol, boolean whitePerspective, Collection<ChessPosition> highlightedPositions) {
+                                                   int startCol, int endCol, boolean whitePerspective, 
+                                                   Collection<ChessPosition> highlightedPositions) {
         for (int row = startRow; whitePerspective ? row >= endRow : row <= endRow; row += rowStep) {
             System.out.print(row + " |");
             for (int col = startCol; whitePerspective ? col <= endCol : col >= endCol; 
